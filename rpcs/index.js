@@ -41,7 +41,7 @@ class CryptoRpcProvider {
     return !!this.rpcs[currency];
   }
 
-  get(currency=this.chain) {
+  get(currency = this.chain) {
     return this.rpcs[currency];
   }
 
@@ -103,6 +103,10 @@ class CryptoRpcProvider {
 
   getTip(params) {
     return this.get(params.currency).getTip(params);
+  }
+
+  signTransaction(params) {
+    return this.get(params.currency).signTransaction(params);
   }
 }
 

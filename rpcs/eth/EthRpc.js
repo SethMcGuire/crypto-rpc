@@ -85,7 +85,7 @@ class EthRPC {
   }
 
   async unlockAndSendToAddress({ address, amount, passphrase }) {
-    const send = phrase => {
+    const send = (phrase) => {
       console.warn('Unlocking for a single transaction.');
       return this.sendToAddress({ address, amount, phrase });
     };
@@ -108,11 +108,11 @@ class EthRPC {
     for (let i = 0; i < nBlocks; i++) {
       const block = await this.web3.eth.getBlock(bestBlock - i);
       const txs = await Promise.all(
-        block.transactions.map(txid => {
+        block.transactions.map((txid) => {
           return this.web3.eth.getTransaction(txid);
         })
       );
-      var blockGasPrices = txs.map(tx => {
+      var blockGasPrices = txs.map((tx) => {
         return tx.gasPrice;
       });
       // sort gas prices in descending order
@@ -207,6 +207,11 @@ class EthRPC {
     const block = await this.web3.eth.getBlock(height);
     const { hash } = block;
     return { height, hash };
+  }
+
+  async signTransaction({ rawTx, passphrase }) {
+    let decodedTx = await this.decodeRawTransaction({ rawTx });
+    return this.web3.eth.personal.signTransaction(decodedTx, passphrase);
   }
 }
 module.exports = EthRPC;

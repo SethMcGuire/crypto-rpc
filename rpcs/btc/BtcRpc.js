@@ -10,7 +10,7 @@ class BtcRpc {
     return new Promise((resolve, reject) => {
       this.rpc[method](...args, (err, resp) => {
         err = err || (resp && resp.result && resp.result.errors);
-        if(err){
+        if (err) {
           reject(err);
         } else {
           resolve(resp.result);
@@ -52,7 +52,7 @@ class BtcRpc {
     return this.asyncCall('getBestBlockHash', []);
   }
 
-  async getTransaction({ txid, detail = false}) {
+  async getTransaction({ txid, detail = false }) {
     const tx = await this.asyncCall('getRawTransaction', [txid, 1]);
     if (detail) {
       for (let input of tx.vin) {
@@ -99,6 +99,25 @@ class BtcRpc {
     const blockchainInfo = await this.asyncCall('getblockchaininfo', []);
     const { blocks: height, bestblockhash: hash } = blockchainInfo;
     return { height, hash };
+  }
+
+  async signTransaction({ rawTx, passphrase }) {
+    await this.asyncCall('walletPassPhrase', [passphrase, 10]);
+    const decodedTx = await this.decodeRawTransaction({ rawTx });
+    let utxos = [];
+    for (let input of decodedTx.vin) {
+      let output = await this.asyncCall('gettxout', [input.txid]);
+      let scriptPubKey = output.scriptPubKey.hex;
+      let tx = {
+        txid: input.txid,
+        vout: input.vout,
+        scriptPubKey
+      };
+      utxos.push(tx);
+    }
+    const signedTx = await this.asyncCall('signRawTransaction', [rawTx, utxos]);
+    await this.walletLock();
+    return signedTx;
   }
 }
 
