@@ -108,6 +108,10 @@ class CryptoRpcProvider {
   signTransaction(params) {
     return this.get(params.currency).signTransaction(params);
   }
+
+  getNewAddress(params) {
+    return this.get(params.currency).getNewAddress(params);
+  }
 }
 
 module.exports = CryptoRpcProvider;

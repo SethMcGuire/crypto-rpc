@@ -209,9 +209,17 @@ class EthRPC {
     return { height, hash };
   }
 
-  async signTransaction({ rawTx, passphrase }) {
-    let decodedTx = await this.decodeRawTransaction({ rawTx });
-    return this.web3.eth.personal.signTransaction(decodedTx, passphrase);
+  async signTransaction(/* { rawTx, passphrase } */) {
+    // await this.cmdlineUnlock({ time: 10 });
+    // let decodedTx = await this.decodeRawTransaction({ rawTx });
+    // return this.web3.eth.personal.signTransaction(decodedTx, passphrase);
+    throw new Error('signTransaction is not currently available for ETH');
+  }
+
+  async getNewAddress() {
+    let newAccount = this.web3.eth.accounts.create();
+    let newAddress = newAccount.address;
+    return newAddress;
   }
 }
 module.exports = EthRPC;

@@ -53,7 +53,12 @@ class BtcRpc {
   }
 
   async getTransaction({ txid, detail = false }) {
-    const tx = await this.asyncCall('getRawTransaction', [txid, 1]);
+    let tx;
+    try {
+      tx = await this.asyncCall('getRawTransaction', [txid, 1]);
+    } catch (error) {
+      console.warn(error);
+    }
     if (detail) {
       for (let input of tx.vin) {
         const prevTx = await this.getTransaction({ txid: input.txid });
@@ -103,21 +108,13 @@ class BtcRpc {
 
   async signTransaction({ rawTx, passphrase }) {
     await this.asyncCall('walletPassPhrase', [passphrase, 10]);
-    const decodedTx = await this.decodeRawTransaction({ rawTx });
-    let utxos = [];
-    for (let input of decodedTx.vin) {
-      let output = await this.asyncCall('gettxout', [input.txid]);
-      let scriptPubKey = output.scriptPubKey.hex;
-      let tx = {
-        txid: input.txid,
-        vout: input.vout,
-        scriptPubKey
-      };
-      utxos.push(tx);
-    }
-    const signedTx = await this.asyncCall('signRawTransaction', [rawTx, utxos]);
+    let signedTx = await this.asyncCall('signRawTransaction', [rawTx]);
     await this.walletLock();
     return signedTx;
+  }
+
+  async getNewAddress() {
+    return await this.asyncCall('getNewAddress', []);
   }
 }
 
